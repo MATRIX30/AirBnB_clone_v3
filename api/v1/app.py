@@ -3,7 +3,7 @@
 This is the main flask api application file from which
 our api runs
 """
-from flask import Flask
+from flask import Flask, make_response, jsonify
 from models import storage
 from api.v1.views import app_views
 import os
@@ -17,6 +17,15 @@ app.register_blueprint(app_views)
 def close_session(error=None):
     """method to close and cleanup the session"""
     storage.close()
+
+
+@app.errorhandler(404)
+def not_found(error):
+    """ method handler for resource not found(404)"""
+    message = {
+               "error": "Not found"
+               }
+    return make_response(jsonify(message), 404)
 
 
 if __name__ == "__main__":
