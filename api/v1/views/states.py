@@ -53,7 +53,7 @@ def create_state():
         state.save()
 
         return make_response(jsonify(state.to_dict()), 201)
-    except BadRequest:
+    except Exception:
         abort(400, "Not a JSON")
 
 
