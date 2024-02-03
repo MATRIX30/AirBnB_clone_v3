@@ -53,22 +53,17 @@ def create_state():
     return jsonify(states[0]), 201
 
 
-@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=True)
-def update_state(state_id):
-    """method to update state by id"""
-    try:
-        request_data = request.get_json()
-        # search for the state to update based on id
-        for state in storage.all(State).values():
-            if state.id == state_id:
-
-                for attrib, value in request_data.items():
-                    print("{}--{}".format(attrib, value))
-                    if attrib in ["id", "created_at", "updated_at"]:
-                        continue
-                    setattr(state, attrib, value)
-                state.save()
-                return make_response(jsonify(state.to_dict()), 200)
+def updates_state(state_id):
+    '''Updates a State object'''
+    all_states = storage.all("State").values()
+    state_obj = [obj.to_dict() for obj in all_states if obj.id == state_id]
+    if state_obj == []:
         abort(404)
-    except Exception:
-        abort(400, "Not a JSON")
+    if not request.get_json():
+        abort(400, 'Not a JSON')
+    state_obj[0]['name'] = request.json['name']
+    for obj in all_states:
+        if obj.id == state_id:
+            obj.name = request.json['name']
+    storage.save()
+    return jsonify(state_obj[0]), 200
