@@ -35,3 +35,18 @@ def delete_amenity(amenity_id):
             storage.save()
             return make_response(jsonify({}), 200)
     abort(404)
+
+
+@app_views.route("/amenities", methods=['POST'],
+                 strict_slashes=False)
+def create_amenity():
+    """method to create a new amenity"""
+    request_data = request.get_json(silent=True)
+    if request_data is None:
+        abort(400, "Not a JSON")
+    if 'name' not in request_data.keys():
+        abort(400, "Missing name")
+    new_amenity = Amenity(**request_data)
+    new_amenity.save()
+    return make_response(jsonify(new_amenity.to_dict()), 201)
+
