@@ -50,3 +50,20 @@ def create_amenity():
     new_amenity.save()
     return make_response(jsonify(new_amenity.to_dict()), 201)
 
+
+@app_views.route("/amenities/<amenity_id>", methods=['PUT'],
+                 strict_slashes=False)
+def update_amenity(amenity_id):
+    """method to update amenity"""
+    request_data = request.get_json(silent=True)
+    if request_data is None:
+        abort(400, "Not a JSON")
+    for amenity in storage.all(Amenity).values():
+        if amenity.id == amenity_id:
+            for attrib, value in request_data.items():
+                if attrib in ["id", "created_at", "updated_at"]:
+                    continue
+                setattr(amenity, attrib, value)
+            amenity.save()
+            return make_response(jsonify(amenity.to_dict()), 200)
+    abort(404)
