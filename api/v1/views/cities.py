@@ -65,18 +65,15 @@ def create_city(state_id):
 @app_views.route("/cities/<city_id>", methods=['PUT'], strict_slashes=False)
 def update_city(city_id):
     """method to update city"""
-    city_to_update = None
-    for city in storage.all(City).values():
-        if city.id == city_id:
-            city_to_update = city
-    if city_to_update is None:
-        abort(404)
     request_data = request.get_json(silent=True)
     if request_data is None:
         abort(400, "Not a JSON")
-    for attrib, value in request_data.items():
-        if attrib in ['id', 'state_id', 'created_at', 'updated_at']:
-            continue
-        setattr(city_to_update, attrib, value)
-        city_to_update.save()
-    return make_response(jsonify(city_to_update.to_dict()), 200)
+    for city in storage.all(City).values():
+        if city.id == city_id:
+            for attrib, value in request_data.items():
+                if attrib in ['id', 'state_id', 'created_at', 'updated_at']:
+                    continue
+                setattr(city, attrib, value)
+            city.save()
+            return make_response(jsonify(city.to_dict()), 200)
+    abort(404)
