@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """Module to handle rest api actions to city"""
 from api.v1.views import app_views
+from flask import jsonify, abort, request, make_response
 from models.city import City
 from models.state import State
 from models import storage
-from flask import jsonify, abort, request, make_response
 
 
 @app_views.route("/states/<state_id>/cities", methods=['GET'],
@@ -17,7 +17,7 @@ def get_cities(state_id):
             cities.append(city.to_dict())
     if not cities:
         abort(404)
-    return jsonify(cities), 200
+    return jsonify(cities)
 
 
 @app_views.route("/cities/<city_id>", methods=['GET'], strict_slashes=False)
@@ -25,7 +25,7 @@ def get_city(city_id):
     """method to get a city by id"""
     for city in storage.all(City).values():
         if city.id == city_id:
-            return jsonify(city.to_dict()), 200
+            return jsonify(city.to_dict())
     abort(404)
 
 
@@ -37,7 +37,7 @@ def delete_city(city_id):
             # storage.delete(city)
             city.delete()
             storage.save()
-            return jsonify({}), 200
+            return make_response(jsonify({}), 200)
     abort(404)
 
 
@@ -46,16 +46,19 @@ def delete_city(city_id):
 def create_city(state_id):
     """method to create new city under a given state"""
     request_data = request.get_json(silent=True)
-    valid_state = False
-    for state in storage.all(State).values():
-        if state.id == state_id:
-            valid_state = True
-    if not valid_state:
-        abort(404)
     if request_data is None:
         abort(400, "Not a JSON")
     if 'name' not in request_data:
         abort(400, "Missing name")
+
+    valid_state = False
+    for state in storage.all(State).values():
+        if state.id == state_id:
+            valid_state = True
+
+    if not valid_state:
+        abort(404)
+
     request_data["state_id"] = state_id
     new_city = City(**request_data)
     new_city.save()
