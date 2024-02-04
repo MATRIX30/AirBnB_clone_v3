@@ -45,22 +45,23 @@ def delete_city(city_id):
                  strict_slashes=False)
 def create_city(state_id):
     """method to create new city under a given state"""
+    valid_state = False
+    for state in storage.all(State).values():
+        if state.id == state_id:
+            valid_state = True
+    if not valid_state:
+        abort(404)
+
     request_data = request.get_json(silent=True)
     if request_data is None:
         abort(400, "Not a JSON")
     if 'name' not in request_data:
         abort(400, "Missing name")
 
-    valid_state = False
-    for state in storage.all(State).values():
-        if state.id == state_id:
-            valid_state = True
-
-    if not valid_state:
-        abort(404)
-
     request_data["state_id"] = state_id
-    new_city = City(**request_data)
+    kwargs = {attrib: value for attrib,
+              value in request_data.items() if attrib in ["name", "state_id"]}
+    new_city = City(**kwargs)
     new_city.save()
     return make_response(jsonify(new_city.to_dict()), 201)
 
