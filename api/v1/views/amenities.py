@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """module to handle amenity API request"""
 from models.amenity import Amenity
-from flask import request, jsonify, make_response
+from flask import request, jsonify, make_response, abort
 from api.v1.views import app_views
 from models import storage
 
