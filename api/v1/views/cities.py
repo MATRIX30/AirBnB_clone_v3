@@ -77,7 +77,7 @@ def update_city(city_id):
             for attrib, value in request_data.items():
                 if attrib in ['id', 'state_id', 'created_at', 'updated_at']:
                     continue
-                if attrib in ["name"]:
+                if attrib in dir(city):
                     setattr(city, attrib, value)
             city.save()
             return make_response(jsonify(city.to_dict()), 200)
