@@ -74,11 +74,10 @@ def update_city(city_id):
         abort(400, "Not a JSON")
     for city in storage.all(City).values():
         if city.id == city_id:
-            """ for attrib, value in request_data.items():
+            for attrib, value in request_data.items():
                 if attrib in ['id', 'state_id', 'created_at', 'updated_at']:
                     continue
-                setattr(city, attrib, value) """
-            setattr(city, "name", request_data["name"])
+                setattr(city, attrib, value)
             city.save()
             return make_response(jsonify(city.to_dict()), 200)
     abort(404)
