@@ -69,6 +69,12 @@ def create_city(state_id):
 @app_views.route("/cities/<city_id>", methods=['PUT'], strict_slashes=False)
 def update_city(city_id):
     """method to update city"""
+    valid_city = False
+    for city in storage.all(City).values():
+        if city.id == city_id:
+            valid_city = True
+    if not valid_city:
+        abort(404)
     request_data = request.get_json(silent=True)
     if request_data is None:
         abort(400, "Not a JSON")
