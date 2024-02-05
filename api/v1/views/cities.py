@@ -11,16 +11,12 @@ from models import storage
                  strict_slashes=False)
 def get_cities(state_id):
     """method to get all cities in a given state_id"""
-    is_state = False
-    for state in storage.all(State).values():
-        if state.id == state_id:
-            is_state = True
-    if not is_state:
+    state = storage.get(State, state_id)
+    if state is None:
         abort(404)
-    cities = []
-    for city in storage.all(City).values():
-        if city.state_id == state_id:
-            cities.append(city.to_dict())
+    # making use of SQLAchemy ORM backref pointing states to its
+    # corresponding cities
+    cities = [city.to_dict() for city in state.cities]
     return jsonify(cities)
 
 
@@ -39,7 +35,7 @@ def delete_city(city_id):
     for city in storage.all(City).values():
         if city.id == city_id:
             # storage.delete(city)
-            storage.delete(city)
+            city.delete()
             storage.save()
             return make_response(jsonify({}), 200)
     abort(404)
