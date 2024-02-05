@@ -4,7 +4,6 @@ from flask import jsonify, abort, make_response, request
 from models.state import State
 from models import storage
 from api.v1.views import app_views
-from werkzeug.exceptions import BadRequest
 
 
 @app_views.route("/states", methods=['GET'], strict_slashes=False)
@@ -56,7 +55,7 @@ def create_state():
     return make_response(jsonify(state.to_dict()), 201)
 
 
-@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=True)
+@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
 def update_state(state_id):
     """method to update state by id"""
     # prevent reqeust.get_json from raising exception if
@@ -69,7 +68,6 @@ def update_state(state_id):
     # search for the state to update based on id
     for state in storage.all(State).values():
         if state.id == state_id:
-
             for attrib, value in request_data.items():
                 if attrib in ["id", "created_at", "updated_at"]:
                     continue
