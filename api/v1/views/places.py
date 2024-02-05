@@ -73,8 +73,13 @@ def create_place(city_id):
 
     if 'name' not in request_data.keys():
         abort(400, "Missing name")
+    list_attrib = ["name", "description", "number_rooms", "number_bathrooms",
+                   "max_guest", "price_by_night", "latitude", "longitude"]
+    kwargs = {attrib: value for attrib,
+              value in request_data.items() if attrib in list_attrib}
+    new_place = City(**kwargs)
 
-    new_place = Place(**request_data)
+    # new_place = Place(**request_data)
     new_place.save()
     return make_response(jsonify(new_place.to_dict()), 201)
 
