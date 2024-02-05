@@ -54,11 +54,9 @@ def create_city(state_id):
 
     request_data = request.get_json(silent=True)
     if request_data is None:
-        return make_response({"error": "Not a JSON"}, 400)
-        # abort(400, "Not a JSON")
+        abort(400, "Not a JSON")
     if 'name' not in request_data:
-        return make_response({"error": "Missing name"}, 400)
-        # abort(400, "Missing name")
+        abort(400, "Missing name")
 
     request_data["state_id"] = state_id
     kwargs = {attrib: value for attrib,
@@ -73,8 +71,7 @@ def update_city(city_id):
     """method to update city"""
     request_data = request.get_json(silent=True)
     if request_data is None:
-        return make_response({"error": "Not a JSON"}, 400)
-        # abort(400, "Not a JSON")
+        abort(400, "Not a JSON")
     for city in storage.all(City).values():
         if city.id == city_id:
             for attrib, value in request_data.items():
