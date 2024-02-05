@@ -5,8 +5,10 @@ from flask import abort, request, jsonify
 
 from api.v1.views import app_views
 from models import storage
+from models.amenity import Amenity
 from models.city import City
 from models.place import Place
+from models.state import State
 from models.user import User
 
 
@@ -80,3 +82,48 @@ def place_id_routes(place_id):
         storage.delete(place)
         storage.save()
         return jsonify({}), 200
+
+
+@app_views.route("/places_search", methods=["POST"], strict_slashes=False)
+def places_search():
+    """
+    POST: Retrieves all 'Place' objects depending on JSON
+    """
+    param_dict = request.get_json(silent=True)
+    if param_dict is None or not isinstance(param_dict, dict):
+        return 'Not a JSON\n', 400
+
+    states_ids = param_dict.get("states")
+    cities_ids = []
+    places = []
+
+    if states_ids:
+        for state_id in states_ids:
+            state = storage.get(State, state_id)
+            if state:
+                cities_ids.extend([city.id for city in state.cities])
+
+    cities_param = param_dict.get("cities")
+    if cities_param:
+        for city_id in cities_param:
+            if city_id not in cities_ids:
+                cities_ids.append(city_id)
+
+    if len(cities_ids) < 1:
+        places = storage.all(Place)
+    else:
+        for city_id in cities_ids:
+            city = storage.get(City, city_id)
+            if city:
+                places.extend(city.places)
+
+    amenities_ids = param_dict.get("amenities")
+    if not amenities_ids or len(amenities_ids) < 1:
+        return jsonify([place.to_dict() for place in places])
+
+    places_filtered = []
+    for place in places:
+        place_amenities_ids = [amenity.id for amenity in place.amenities]
+        if all(amenmities) in place_amenities_ids:
+            places_filtered.append(place)
+    return jsonify([place.to_dict() for place in places_filtered])
