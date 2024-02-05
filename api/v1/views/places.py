@@ -91,13 +91,16 @@ def update_place(place_id):
     request_data = request.get_json(silent=True)
     if request_data is None:
         abort(400, "Not a JSON")
+    list_attrib = ["name", "description", "number_rooms", "number_bathrooms",
+                   "max_guest", "price_by_night", "latitude", "longitude"]
     for place in storage.all(Place).values():
         if place.id == place_id:
             for attrib, value in request_data.items():
                 if attrib in ["id", "user_id", "city_id", "created_at",
                               "updated_at"]:
                     continue
-                setattr(place, attrib, value)
+                if attrib in list_attrib:
+                    setattr(place, attrib, value)
             place.save()
             return make_response(jsonify(place.to_dict()), 200)
     abort(404)
